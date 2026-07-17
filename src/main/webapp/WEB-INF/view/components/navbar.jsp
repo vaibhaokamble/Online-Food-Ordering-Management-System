@@ -12,12 +12,17 @@
 String userType=(String)session.getAttribute("user-login");
 Admin admin = null;
 User user = null ;
+DeliveryPerson deliveryPerson = null;
 if(userType != null && userType.equals("admin")){
 	 admin = (Admin) session.getAttribute("active-user");
 }
 
 else if(userType != null && userType.equals("user")){
 	 user= (User)session.getAttribute("active-user");
+}
+
+else if(userType != null && userType.equals("delivery")){
+	 deliveryPerson = (DeliveryPerson) session.getAttribute("active-user");
 }
 
 ApplicationContext context =  WebApplicationContextUtils.getWebApplicationContext(getServletContext());
@@ -48,6 +53,16 @@ OrderDao orderDao =context.getBean(OrderDao.class);
     %>
                  <li class="nav-item active">
                     <a class="nav-link" href="admindashboard"><b class="text-color">Admin Page</b> <span class="sr-only">(current)</span></a>
+                 </li>
+    <%
+        	 }
+    %>
+    <%
+        	 if(userType != null && userType.equals("delivery"))
+        	 {
+    %>
+                 <li class="nav-item active">
+                    <a class="nav-link" href="deliverydashboard"><b class="text-color">Delivery Dashboard</b> <span class="sr-only">(current)</span></a>
                  </li>
     <%
         	 }
@@ -133,6 +148,14 @@ OrderDao orderDao =context.getBean(OrderDao.class);
       
       <li class="nav-item text-color active">
         <a class="nav-link" href="userlogin"><b class="text-color">Login</b></a>
+      </li>
+      
+      <li class="nav-item active text-color">
+        <a class="nav-link" href="deliveryregister"><b class="text-color">Delivery Register</b></a>
+      </li>  
+      
+      <li class="nav-item text-color active">
+        <a class="nav-link" href="deliverylogin"><b class="text-color">Delivery Login</b></a>
       </li>    
     </ul>
     
