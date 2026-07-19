@@ -6,9 +6,7 @@
 <%@ page import ="java.sql.*"%>
 <%@ page import ="java.util.*"%>
 
-
 <%
-
 String userType=(String)session.getAttribute("user-login");
 Admin admin = null;
 User user = null ;
@@ -16,11 +14,9 @@ DeliveryPerson deliveryPerson = null;
 if(userType != null && userType.equals("admin")){
 	 admin = (Admin) session.getAttribute("active-user");
 }
-
 else if(userType != null && userType.equals("user")){
 	 user= (User)session.getAttribute("active-user");
 }
-
 else if(userType != null && userType.equals("delivery")){
 	 deliveryPerson = (DeliveryPerson) session.getAttribute("active-user");
 }
@@ -31,392 +27,321 @@ CartDao cartDao = context.getBean(CartDao.class);
 FoodDao foodDao = context.getBean(FoodDao.class);
 UserDao userDao =context.getBean(UserDao.class);
 OrderDao orderDao =context.getBean(OrderDao.class);
-      
+
+int cartCount = 0;
+if(user != null) {
+    List<Cart> cl = cartDao.findByUserId(user.getId());
+    if(cl != null) cartCount = cl.size();
+}
 %>
 
-<nav class="navbar navbar-expand-lg navbar-dark custom-bg">
-
-<div class="container-fluid">
-  <img src="resources/images/mainlogo.png" width="35" height="35" class="d-inline-block align-top" alt="">
-  <a class="navbar-brand" href="/"><h3 class="text-color"><i>Online Food Ordering</i></h3></a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-    
-    
-    <%
-        	 if(userType != null && userType.equals("admin"))
-        	 {
-    %>
-                 <li class="nav-item active">
-                    <a class="nav-link" href="admindashboard"><b class="text-color">Admin Page</b> <span class="sr-only">(current)</span></a>
-                 </li>
-    <%
-        	 }
-    %>
-    <%
-        	 if(userType != null && userType.equals("delivery"))
-        	 {
-    %>
-                 <li class="nav-item active">
-                    <a class="nav-link" href="deliverydashboard"><b class="text-color">Delivery Dashboard</b> <span class="sr-only">(current)</span></a>
-                 </li>
-    <%
-        	 }
-    %>
-      <li class="nav-item active dropdown text-color">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-         <b class="text-color"> Categories</b>
+<div class="app-wrapper">
+    <!-- Premium Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+        <a href="/" class="sidebar-brand">
+            <i class="fa-solid fa-utensils"></i>
+            <span>FoodBite</span>
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="category?categoryId=0" >All</a>
-               <%
-                    for(Category c: categoryDao.findAll())
-                    {    	
-               %> 
-                         <a class="dropdown-item" href="category?categoryId=<%=c.getId() %>"><%=c.getName() %></a>     
-               <%
-                    }
-               %>
-          
-        </div>
-      </li>
-      
-      <li class="nav-item active text-color ml-2" data-toggle="modal" data-target=".aboutusmodal">
-          <div class="nav-link" ><b class="text-color">About us</b></div>
-      </li>
-      
-      <li class="nav-item active text-color ml-2" data-toggle="modal" data-target=".contactusmodal">
-          <div class="nav-link" ><b class="text-color">Contact us</b></div>
-      </li>
-     
-    </ul>
-    
-    <form class="form-inline my-2 my-lg-0" action="searchfood">
-      <input class="form-control mr-sm-2" type="text" placeholder="Search Food" aria-label="Search" size="40" name="foodname">
-      <button type="submit" class="btn btn-light text-color"><b>Search</b></button>
-    </form>
-    
-    
-        <%
-           if(userType != null) {
-        %>
-          <ul class="navbar-nav ml-auto">
-              
-              <%
-                  if(userType.equals("user"))
-                  {	  
-              %>
-                     <li class="nav-item active" data-toggle="modal" data-target="#showmycartmodal">
-                        <div class="nav-link text-color"><img src="resources/images/cart.png" style="width:23px;" alt="img"></div>
-                     </li> 
-                     
-                     <li class="nav-item active text-color">
-                        <a class="nav-link" href="myorder"><b class="text-color">My Orders</b></a>
-                     </li>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="/" class="active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </a>
+            </li>
             
-              <%
-                  }
-             %> 
-           
-             
-             <li class="nav-item active text-color" data-toggle="modal" data-target=".logout-modal">
-               <a class="nav-link" href="#" ><b class="text-color">Logout</b></a>
-             </li> 
-              
-               
-              </ul>   
-              <%
-             
-           }     
-              
-                    
-        else
-        {
-    %>
-      <ul class="navbar-nav ml-auto text-color">
-       <li class="nav-item active">
-        <div class="nav-link" data-toggle="modal" data-target=".forgetpasswordmodal"><b class="text-color">Forget password</b></div>
-      </li> 
-    
-      <li class="nav-item active text-color">
-        <a class="nav-link" href="userregister"><b class="text-color">Register</b></a>
-      </li>  
-      
-      <li class="nav-item text-color active">
-        <a class="nav-link" href="userlogin"><b class="text-color">Login</b></a>
-      </li>
-      
-      <li class="nav-item active text-color">
-        <a class="nav-link" href="deliveryregister"><b class="text-color">Delivery Register</b></a>
-      </li>  
-      
-      <li class="nav-item text-color active">
-        <a class="nav-link" href="deliverylogin"><b class="text-color">Delivery Login</b></a>
-      </li>    
-    </ul>
-    
-    <%
-        }
-    %>     
-    
-  </div>
-  </div>
-</nav>
+            <% if(userType != null && userType.equals("admin")) { %>
+            <li>
+                <a href="admindashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+            </li>
+            <% } %>
+            
+            <% if(userType != null && userType.equals("delivery")) { %>
+            <li>
+                <a href="deliverydashboard">
+                    <i class="fa-solid fa-truck"></i>
+                    <span>Delivery Tasks</span>
+                </a>
+            </li>
+            <% } %>
+            
+            <li class="mt-4 mb-2 px-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;">Menu</li>
+            
+            <li>
+                <a href="category?categoryId=0">
+                    <i class="fa-solid fa-burger"></i>
+                    <span>All Categories</span>
+                </a>
+            </li>
+            
+            <% for(Category c: categoryDao.findAll()) { %>
+            <li>
+                <a href="category?categoryId=<%=c.getId()%>">
+                    <i class="fa-solid fa-angle-right" style="font-size: 0.8rem;"></i>
+                    <span><%=c.getName()%></span>
+                </a>
+            </li>
+            <% } %>
+            
+            <li class="mt-4 mb-2 px-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;">Company</li>
+            
+            <li>
+                <a href="#" data-bs-toggle="modal" data-bs-target=".aboutusmodal">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>About Us</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-bs-toggle="modal" data-bs-target=".contactusmodal">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Contact</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+        <!-- Top Navbar -->
+        <nav class="app-navbar">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light d-lg-none me-3" type="button" onclick="document.getElementById('appSidebar').classList.toggle('show')">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <form class="navbar-search d-none d-md-block" action="searchfood">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" name="foodname" placeholder="Search for food, restaurants...">
+                </form>
+            </div>
+            
+            <div class="navbar-actions">
+                <a href="#" class="action-icon">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge-count" style="background: var(--warning-color);">3</span>
+                </a>
+                
+                <% if(userType != null && userType.equals("user")) { %>
+                <a href="#" class="action-icon" data-bs-toggle="modal" data-bs-target="#showmycartmodal">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <% if(cartCount > 0) { %>
+                    <span class="badge-count"><%=cartCount%></span>
+                    <% } %>
+                </a>
+                <a href="myorder" class="action-icon">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </a>
+                <% } %>
+                
+                <% if(userType != null) { %>
+                <div class="dropdown profile-dropdown ms-2">
+                    <a href="#" class="dropdown-toggle d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                        <div class="d-flex flex-column text-end me-2 d-none d-sm-flex">
+                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                                <% if(userType.equals("admin") && admin != null) out.print(admin.getFirstname()); 
+                                   else if(userType.equals("user") && user != null) out.print(user.getFirstname());
+                                   else if(deliveryPerson != null) out.print(deliveryPerson.getFirstname()); %>
+                            </span>
+                            <span class="text-muted" style="font-size: 0.75rem; text-transform: capitalize;"><%=userType%></span>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name=User&background=2563EB&color=fff" alt="Profile">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="min-width: 200px;">
+                        <li><a class="dropdown-item py-2" href="#"><i class="fa-regular fa-user me-2 text-muted"></i> My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#" data-bs-toggle="modal" data-bs-target=".logout-modal"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                    </ul>
+                </div>
+                <% } else { %>
+                <div class="dropdown ms-2">
+                    <a class="btn btn-primary rounded-pill px-4" href="#" data-bs-toggle="dropdown">
+                        <i class="fa-regular fa-circle-user me-2"></i> Sign In
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-3" style="min-width: 250px;">
+                        <li><h6 class="dropdown-header text-primary fw-bold">Customer</h6></li>
+                        <li><a class="dropdown-item py-2" href="userlogin"><i class="fa-solid fa-arrow-right-to-bracket me-2 text-muted"></i> Login</a></li>
+                        <li><a class="dropdown-item py-2" href="userregister"><i class="fa-solid fa-user-plus me-2 text-muted"></i> Register</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">Delivery Partner</h6></li>
+                        <li><a class="dropdown-item py-2" href="deliverylogin"><i class="fa-solid fa-motorcycle me-2 text-muted"></i> Login</a></li>
+                        <li><a class="dropdown-item py-2" href="deliveryregister"><i class="fa-solid fa-user-plus me-2 text-muted"></i> Register</a></li>
+                    </ul>
+                </div>
+                <% } %>
+            </div>
+        </nav>
 
 <!-- show my cart modal -->
-
-<div class="modal fade" id="showmycartmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header custom-bg text-white text-center">
-        <h5 class="modal-title" id="exampleModalLongTitle" >MY CART</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+<div class="modal fade" id="showmycartmodal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-white text-dark border-bottom px-4 py-3">
+        <h5 class="modal-title fw-bold" id="cartModalLabel"><i class="fa-solid fa-cart-shopping me-2 text-primary"></i> My Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
      <%
       if(user!=null)
       {
     	  List<Cart> l= cartDao.findByUserId(user.getId());
-    	 
      %>
-      <div class="modal-body">
-        
-        <%
-            if(l.isEmpty())
-            {
-        %>
-        <div class="text-center">
-        <h1>CART IS EMPTY!!</h1>
-        <hr>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <div class="modal-body p-4">
+        <% if(l.isEmpty()) { %>
+        <div class="text-center py-5">
+            <i class="fa-solid fa-cart-arrow-down fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted fw-bold">Your Cart is Empty</h3>
+            <p>Looks like you haven't added anything yet.</p>
         </div>
-        <%
-            }
-        
-            else
-            {
-            	
-            	
-        %>
+        <% } else { %>
         <div class="table-responsive">
-          <table class="table">
-  <thead class="custom-bg text-white">
-    <tr>
-      <th scope="col">Food Image</th>
-      <th scope="col">Food Title</th>    
-      <th scope="col">Food Description</th>
-      <th scope="col">Quantity</th>
-      <th scope="col">Price</th>
-      <th scope="col">Date</th>
-      <th scope="col">Action</th>
-    </tr>
-  </thead>
-  
- 
-  
-  <tbody>
-
-   <%
-       double totalCartPrice = 0;
-      List<Integer> listOfFoodId = new ArrayList<>();
-     
-      for(Cart c:l)
-      {
-    	  int foodId=c.getFoodId();
-    	  Optional<Food> optional = foodDao.findById(foodId);
-    	  Food f = null;
-    	  if(optional.isPresent()) {
-    		  f = optional.get();
-    	  }
-    	  
-    	  double foodPrice = Helper.getFoodSellingPrice(f.getPrice(), f.getDiscount());
-    	  double cartPrice = foodPrice * c.getQuantity();
-    	  
-    	  totalCartPrice = totalCartPrice + cartPrice;
-     	  
-    	  listOfFoodId.add(f.getId());
-   %>
-    <tr class="text-center">
-      <td><img style="max-height:100px;max-width:70px;width:auto;" class="img-fluid mx-auto d-block" src="resources/productpic/<%=f.getImagePath()%>" alt="users_pic" ></td>
-      <td class="mid-align"><%=f.getName() %></td>
-      <td class="mid-align"><%=f.getDescription() %></td>
-      <td class="mid-align"><%=c.getQuantity() %></td>
-      <td class="mid-align"><%=Helper.getFoodSellingPrice(f.getPrice(), f.getDiscount()) %></td>
-      <td class="mid-align"><%=c.getDate() %></td>
-      <td class="mid-align"><a href="deletecart?cartId=<%=c.getId()%>"><button type="button" class="btn btn-danger">Remove</button></a></td>
-    </tr>
-    <%
-      }
-    %>
-  </tbody>
- 
-  
-</table>
-</div>
-<hr>
-
-<div class="text-right">
-     <p style="font-size:25px;"><b>Total Price :&#8377;<%= totalCartPrice %>/- </b></p>  
-</div>
-<hr>
-<div class="row">
-      <form action="checkout" method="post">
-           <input type="hidden" name="amount" value="<%=totalCartPrice%>">
-          <input type="submit" class="btn custom-bg text-light ml-5" value="Checkout">
-      </form>
-      <button type="button" class="btn btn-secondary ml-5" data-dismiss="modal">Close</button>
-</div>
-
-       <%
-            }
-       %>
-         
+          <table class="table table-custom align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Title</th>    
+              <th scope="col">Qty</th>
+              <th scope="col">Price</th>
+              <th scope="col">Date Added</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+           <%
+               double totalCartPrice = 0;
+              for(Cart c:l)
+              {
+            	  int foodId=c.getFoodId();
+            	  Optional<Food> optional = foodDao.findById(foodId);
+            	  Food f = optional.isPresent() ? optional.get() : null;
+            	  if(f != null) {
+            	  double foodPrice = Helper.getFoodSellingPrice(f.getPrice(), f.getDiscount());
+            	  double cartPrice = foodPrice * c.getQuantity();
+            	  totalCartPrice += cartPrice;
+           %>
+            <tr>
+              <td>
+                  <div class="bg-light rounded d-flex justify-content-center align-items-center overflow-hidden" style="width: 60px; height: 60px;">
+                      <img src="resources/productpic/<%=f.getImagePath()%>" alt="food" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+              </td>
+              <td>
+                  <h6 class="mb-0 fw-bold"><%=f.getName() %></h6>
+                  <small class="text-muted"><%=Helper.get10Words(f.getDescription()) %></small>
+              </td>
+              <td><span class="badge bg-primary px-3 py-2 rounded-pill"><%=c.getQuantity() %></span></td>
+              <td><strong class="text-primary fs-5">&#8377;<%=Helper.getFoodSellingPrice(f.getPrice(), f.getDiscount()) %></strong></td>
+              <td class="text-muted"><small><%=c.getDate() %></small></td>
+              <td>
+                  <a href="deletecart?cartId=<%=c.getId()%>" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+            <% } } %>
+          </tbody>
+        </table>
+        </div>
+        
+        <div class="bg-light rounded-4 p-4 mt-4 d-flex justify-content-between align-items-center shadow-sm">
+             <div class="d-flex flex-column">
+                 <span class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 600;">Total Amount</span>
+                 <h3 class="mb-0 text-primary fw-bold">&#8377;<%= totalCartPrice %></h3>
+             </div>
+             <div class="d-flex gap-3">
+                 <button type="button" class="btn btn-outline-primary px-4" data-bs-dismiss="modal">Continue Shopping</button>
+                 <form action="checkout" method="post" class="m-0">
+                      <input type="hidden" name="amount" value="<%=totalCartPrice%>">
+                     <button type="submit" class="btn btn-primary px-4 shadow"><i class="fa-solid fa-credit-card me-2"></i> Proceed to Checkout</button>
+                 </form>
+             </div>
+        </div>
+       <% } %>
       </div>
-  <%
-           
-      }
-  %>
+  <% } %>
     </div>
   </div>
 </div>
 
-<!--  -->
-
 <!-- Logout modal -->
-
-<div class="modal fade logout-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-    <div class="modal-header custom-bg text-white text-center">
-        <h5 class="modal-title" id="exampleModalLongTitle" >Log Out</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body text-center">
-            <h5>Do you want to logout?</h5>
-          
-          <div class="text-center">
-            <a href="logout"><button type="button" class="btn custom-bg text-white">Yes</button></a>
-            <button type="button" class="btn btn-secondary ml-5" data-dismiss="modal">No</button>
-          </div> 
+<div class="modal fade logout-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+    <div class="modal-body text-center p-5">
+            <div class="mb-4 text-danger">
+                <i class="fa-solid fa-right-from-bracket fa-4x"></i>
+            </div>
+            <h4 class="mb-4 fw-bold">Ready to leave?</h4>
+            <div class="d-grid gap-2">
+              <a href="logout" class="btn btn-danger btn-lg rounded-pill shadow">Yes, Logout</a>
+              <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+            </div> 
      </div>     
     </div>
   </div>
 </div>
 
-<!-- *********** -->
-
 <!-- About us modal -->
-
-<div class="modal fade aboutusmodal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-       <div class="modal-header custom-bg text-white text-center">
-        <h5 class="modal-title text-color" id="exampleModalLongTitle" >About Us</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div> 
-      <div class="modal-body">
-        <div class="container">
-        <p style="font-size:20px;">
-          <b>
-              An e-commerce website, by definition, is a website that allows you to buy and sell tangible goods,
-               digital products or services online. Trade, be it barter exchange or buying and selling of goods and
-                services has been prevalent for centuries. No one can be self-sufficient. And this brings out the need
-                 for demand and supply of goods and services.<br><br> Transactions have been going on all over the world
-                  for centuries, locally, and across locations. Keeping the same concept in mind, now think electronic.
-                   However, also bear in mind that with the whole world going online, data privacy laws have become increasingly stringent.
-                    And before you begin, an eCommerce venture you should be aware of all the legal policies required for your eCommerce website.
-          </b>
-        </p>
+<div class="modal fade aboutusmodal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-5">
+        <div class="text-center mb-5">
+            <i class="fa-solid fa-utensils fa-4x text-primary mb-3"></i>
+            <h2 class="fw-bold text-dark">FoodBite</h2>
         </div>
-      </div>
-      <div class="modal-footer">
-       <div class="text-center">
-        <button type="button" class="btn custom-bg text-color" data-dismiss="modal">Close</button>
-       </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-rocket me-2"></i> Our Mission</h5>
+                <p class="text-muted lh-lg">We strive to provide you with the best culinary experience right at your doorstep. We partner with top restaurants and expert delivery personnel to ensure your food arrives hot, fresh, and on time.</p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-heart me-2"></i> Why Choose Us</h5>
+                <ul class="text-muted lh-lg list-unstyled">
+                    <li><i class="fa-solid fa-check text-success me-2"></i> Lightning fast delivery</li>
+                    <li><i class="fa-solid fa-check text-success me-2"></i> Quality food from top chefs</li>
+                    <li><i class="fa-solid fa-check text-success me-2"></i> 24/7 customer support</li>
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary w-100 mt-4 rounded-pill" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
-<!-- ********** -->
 
 <!-- Contact us modal -->
-
-<div class="modal fade contactusmodal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-       <div class="modal-header custom-bg text-white text-center">
-        <h5 class="modal-title text-color" id="exampleModalLongTitle" >Contact Us</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div> 
-      <div class="modal-body">
-        <div class="container text-center">
-        <p style="font-size:23px;">
-            <b>
-                <img src="resources/images/phonee.png" style="width:27px;" alt="img">+91 XXXXXXXXX / +91 XXXXXXXX<br>
-                <img src="resources/images/emaill.png" style="width:29px;" alt="img">xxxxxxx@gmail.com
-            </b>
-        </p>
+<div class="modal fade contactusmodal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg p-3">
+      <div class="modal-body text-center p-4">
+        <div class="bg-light rounded-circle d-inline-flex p-4 mb-4 text-primary">
+            <i class="fa-solid fa-headset fa-3x"></i>
         </div>
-      </div>
-      <div class="modal-footer">
-       <div class="text-center">
-        <button type="button" class="btn custom-bg text-color" data-dismiss="modal">Close</button>
-       </div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ********** -->
-
-<!-- forget password modal -->
-
-<div class="modal fade forgetpasswordmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header custom-bg text-white text-center">
-        <h5 class="modal-title" id="exampleModalLongTitle" >Forget Password</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-          <form action="forgetpassword" method="post">
- 
-    <div class="form-group ">
-      <label for="inputPassword4">Email</label>
-      <input type="email" class="form-control" id="email" name="emailid">
-    </div>
-    <div class="form-group ">
-      <label for="inputPassword4">Phone</label>
-      <input type="text" class="form-control" id="phone" name="mobileno">
-    </div>
-    <div class="form-group">
-      <label for="inputPassword4">New Password</label>
-      <input type="password" class="form-control" id="pass" name="password" >
-    </div>
-
-  <div class="container text-center">
-       
-       <input type="submit" class="btn custom-bg text-light" value="Change">
-       <button type="button" class="btn custom-bg text-light ml-5" data-dismiss="modal">Close</button>
-                                      
-  </div>   
-</form>
+        <h3 class="fw-bold mb-2">Get in Touch</h3>
+        <p class="text-muted mb-4">Our support team is always ready to help you.</p>
+        
+        <div class="card bg-light border-0 rounded-4 p-3 mb-3 text-start hover-shadow transition">
+            <div class="d-flex align-items-center">
+                <div class="bg-white rounded-circle p-3 text-primary shadow-sm me-3"><i class="fa-solid fa-phone"></i></div>
+                <div>
+                    <h6 class="mb-1 fw-bold text-dark">Call Us</h6>
+                    <p class="mb-0 text-muted">+91 98765 43210</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-light border-0 rounded-4 p-3 mb-4 text-start hover-shadow transition">
+            <div class="d-flex align-items-center">
+                <div class="bg-white rounded-circle p-3 text-primary shadow-sm me-3"><i class="fa-solid fa-envelope"></i></div>
+                <div>
+                    <h6 class="mb-1 fw-bold text-dark">Email Us</h6>
+                    <p class="mb-0 text-muted">support@foodbite.com</p>
+                </div>
+            </div>
+        </div>
+        
+        <button type="button" class="btn btn-primary w-100 rounded-pill" data-bs-dismiss="modal">Close Window</button>
       </div>
     </div>
   </div>
 </div>
-
-
-<!--  -->

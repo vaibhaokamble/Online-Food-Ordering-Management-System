@@ -23,7 +23,6 @@ import com.onlinefoodorder.dao.FoodDao;
 import com.onlinefoodorder.model.Food;
 
 @Controller
-@MultipartConfig
 public class FoodController {
 	
 	@Autowired
@@ -42,7 +41,7 @@ public class FoodController {
 		
 		String fileName=part.getSubmittedFileName();
 		
-		String uploadPath="C:\\Users\\admin\\Desktop\\project\\online-food-order\\src\\main\\webapp\\resources\\productpic\\"+fileName;
+		String uploadPath = System.getProperty("user.dir") + "\\src\\main\\webapp\\resources\\productpic\\" + fileName;
 		
 		try
 		{
@@ -97,7 +96,7 @@ public class FoodController {
 			
 			String fileName=part.getSubmittedFileName();
 			
-			String uploadPath="C:\\Users\\admin\\Desktop\\project\\online-food-order\\src\\main\\webapp\\resources\\productpic\\"+fileName;
+			String uploadPath = System.getProperty("user.dir") + "\\src\\main\\webapp\\resources\\productpic\\" + fileName;
 			
 			try
 			{
