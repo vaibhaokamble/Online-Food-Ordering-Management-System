@@ -11,7 +11,7 @@
 	<groupId>com.onlinefoodorder</groupId>
 	<artifactId>online-food-order</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<name>online-food-order</name>
 	<description>Online Food Ordering using spring boot + jsp + mysql</description>
 	<properties>
