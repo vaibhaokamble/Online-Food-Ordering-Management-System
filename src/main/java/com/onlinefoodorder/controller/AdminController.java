@@ -18,11 +18,7 @@ public class AdminController {
 	@Autowired
 	private AdminDao adminDao;
 	
-	@GetMapping("/")
-	public String goToHomeDuringStart() {
-		return "index";
-	}
-	
+
 	@GetMapping("/home")
 	public String goToHome() {
 		return "index";

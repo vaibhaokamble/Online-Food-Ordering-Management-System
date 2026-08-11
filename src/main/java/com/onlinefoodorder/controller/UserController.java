@@ -18,6 +18,11 @@ public class UserController {
 	@Autowired
 	private UserDao userDao;
 	
+	@GetMapping("/")
+	public String home() {
+		return "index";
+	}
+	
 	@GetMapping("/userlogin")
 	public String goToLoginPage() {
 		return "userlogin";
